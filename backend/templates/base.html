@@ -7,6 +7,19 @@
 <body>
     <header>
         <h1><a href="{% url 'blog:post_list' %}">Blog</a></h1>
+        <nav>
+            {% if user.is_authenticated %}
+                <span>{{ user.username }}</span>
+                <a href="{% url 'blog:post_create' %}">New Post</a>
+                <form method="post" action="{% url 'logout' %}" style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit">Log out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log in</a>
+                <a href="{% url 'core:signup' %}">Sign up</a>
+            {% endif %}
+        </nav>
     </header>
     <main>
         {% block content %}{% endblock %}

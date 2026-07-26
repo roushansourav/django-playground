@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -21,24 +21,29 @@ class PostDetailView(DetailView):
     slug_url_kwarg = "slug"
 
 
-class PostCreateView(CreateView):
+class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     fields = ["title", "slug", "body", "published"]
     template_name = "blog/post_form.html"
 
     def form_valid(self, form):
-        # Stage 2 replaces this with self.request.user once auth exists.
-        form.instance.author = get_user_model().objects.first()
+        form.instance.author = self.request.user
         return super().form_valid(form)
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     fields = ["title", "slug", "body", "published"]
     template_name = "blog/post_form.html"
 
+    def test_func(self):
+        return self.get_object().author == self.request.user
 
-class PostDeleteView(DeleteView):
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = "blog/post_confirm_delete.html"
     success_url = reverse_lazy("blog:post_list")
+
+    def test_func(self):
+        return self.get_object().author == self.request.user
