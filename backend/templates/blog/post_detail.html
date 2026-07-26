@@ -7,4 +7,25 @@
         <h2>{{ post.title }}</h2>
         <p>{{ post.body }}</p>
     </article>
+
+    <section>
+        <h3>Comments</h3>
+        <ul>
+            {% for comment in post.comments.all %}
+                <li><strong>{{ comment.author }}</strong>: {{ comment.body }}</li>
+            {% empty %}
+                <li>No comments yet.</li>
+            {% endfor %}
+        </ul>
+
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'blog:comment_create' post.slug %}">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button type="submit">Add comment</button>
+            </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to comment.</p>
+        {% endif %}
+    </section>
 {% endblock %}
