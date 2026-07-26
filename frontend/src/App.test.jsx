@@ -16,3 +16,9 @@ test('shows Log in link when unauthenticated', () => {
   render(<App />)
   expect(screen.getByText('Log in')).toBeInTheDocument()
 })
+
+test('shows New Post link when authenticated', () => {
+  localStorage.setItem('accessToken', 'fake-token')
+  render(<App />)
+  expect(screen.getByText('New Post')).toBeInTheDocument()
+})
