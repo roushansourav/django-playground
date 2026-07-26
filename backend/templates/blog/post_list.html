@@ -3,6 +3,7 @@
 {% block title %}Posts{% endblock %}
 
 {% block content %}
+    {% if tag %}<h2>Posts tagged "{{ tag.name }}"</h2>{% endif %}
     <ul>
         {% for post in posts %}
             <li>
