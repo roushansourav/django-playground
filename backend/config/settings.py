@@ -40,11 +40,13 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.blog',
     'rest_framework',
+    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'core.User'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -141,3 +143,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
