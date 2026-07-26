@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react'
-import { test, expect } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import App from './App'
+
+vi.mock('./api/client', () => ({
+  apiFetch: vi.fn().mockResolvedValue({ results: [] }),
+}))
 
 test('renders Blog heading', () => {
   render(<App />)
