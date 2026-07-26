@@ -9,6 +9,7 @@ class PostCreateViewTests(TestCase):
     def setUp(self):
         User = get_user_model()
         self.author = User.objects.create_user(username="alice", password="testpass123")
+        self.client.force_login(self.author)
 
     def test_get_form_renders(self):
         response = self.client.get(reverse("blog:post_create"))
@@ -37,6 +38,7 @@ class PostUpdateViewTests(TestCase):
         self.post = Post.objects.create(
             title="Original", slug="original", body="...", author=self.author
         )
+        self.client.force_login(self.author)
 
     def test_post_updates_title(self):
         response = self.client.post(
@@ -60,6 +62,7 @@ class PostDeleteViewTests(TestCase):
         self.post = Post.objects.create(
             title="To Delete", slug="to-delete", body="...", author=self.author
         )
+        self.client.force_login(self.author)
 
     def test_post_deletes(self):
         response = self.client.post(
