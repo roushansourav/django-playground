@@ -4,7 +4,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.blog.forms import CommentForm
-from apps.blog.models import Comment, Post
+from apps.blog.models import Comment, Post, Tag
 
 
 class PostListView(ListView):
@@ -14,6 +14,21 @@ class PostListView(ListView):
 
     def get_queryset(self):
         return Post.objects.filter(published=True)
+
+
+class TaggedPostListView(ListView):
+    model = Post
+    template_name = "blog/post_list.html"
+    context_object_name = "posts"
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs["tag_slug"])
+        return Post.objects.filter(published=True, tags=self.tag)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tag"] = self.tag
+        return context
 
 
 class PostDetailView(DetailView):
@@ -30,7 +45,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ["title", "slug", "body", "published"]
+    fields = ["title", "slug", "body", "published", "tags"]
     template_name = "blog/post_form.html"
 
     def form_valid(self, form):
@@ -40,7 +55,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ["title", "slug", "body", "published"]
+    fields = ["title", "slug", "body", "published", "tags"]
     template_name = "blog/post_form.html"
 
     def test_func(self):
