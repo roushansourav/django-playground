@@ -13,7 +13,7 @@ class TimestampedMixin:
         return "2026-01-01T00:00:00Z"
 
     def _init_timestamp(self) -> None:
-        raise NotImplementedError
+        self.created_at = self._now()
 
 
 class SerializableMixin:
@@ -22,7 +22,7 @@ class SerializableMixin:
     """
 
     def to_dict(self) -> dict:
-        raise NotImplementedError
+        return dict(self.__dict__)
 
 
 class Note(TimestampedMixin, SerializableMixin):
@@ -31,4 +31,4 @@ class Note(TimestampedMixin, SerializableMixin):
     def __init__(self, title: str, body: str):
         self.title = title
         self.body = body
-        raise NotImplementedError  # call self._init_timestamp() here, then remove this line
+        self._init_timestamp()

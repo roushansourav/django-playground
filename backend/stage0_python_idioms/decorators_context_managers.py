@@ -9,7 +9,12 @@ def timed(func):
     Must use functools.wraps so the wrapped function keeps its __name__.
     (Timing itself isn't asserted in tests — this drills decorator plumbing.)
     """
-    raise NotImplementedError
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def retry(times: int):
@@ -20,7 +25,21 @@ def retry(times: int):
         @retry(3)
         def flaky(): ...
     """
-    raise NotImplementedError
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exc = None
+            for _ in range(times):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as exc:
+                    last_exc = exc
+            raise last_exc
+
+        return wrapper
+
+    return decorator
 
 
 class suppressing:
@@ -32,10 +51,10 @@ class suppressing:
     """
 
     def __init__(self, *exceptions):
-        raise NotImplementedError
+        self.exceptions = exceptions
 
     def __enter__(self):
-        raise NotImplementedError
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        raise NotImplementedError
+        return exc_type is not None and issubclass(exc_type, self.exceptions)

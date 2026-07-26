@@ -15,7 +15,7 @@ class Point:
 
     def distance_to(self, other: "Point") -> float:
         """Euclidean distance to another Point."""
-        raise NotImplementedError
+        return ((self.x - other.x) ** 2 + (self.y - other.y) ** 2) ** 0.5
 
 
 def merge_records(a: dict, b: dict) -> dict:
@@ -23,4 +23,4 @@ def merge_records(a: dict, b: dict) -> dict:
 
     Example: merge_records({"x": 1}, {"x": 2, "y": 3}) == {"x": 2, "y": 3}
     """
-    raise NotImplementedError
+    return {**a, **b}

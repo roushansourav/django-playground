@@ -6,7 +6,7 @@ def dedupe_preserve_order(items: list) -> list:
 
     Example: dedupe_preserve_order([1, 2, 1, 3, 2]) == [1, 2, 3]
     """
-    raise NotImplementedError
+    return list(dict.fromkeys(items))
 
 
 def flatten_one_level(nested: list) -> list:
@@ -14,7 +14,7 @@ def flatten_one_level(nested: list) -> list:
 
     Example: flatten_one_level([[1, 2], [3], [4, 5]]) == [1, 2, 3, 4, 5]
     """
-    raise NotImplementedError
+    return [item for sublist in nested for item in sublist]
 
 
 def evens_squared(nums: list) -> list:
@@ -22,7 +22,7 @@ def evens_squared(nums: list) -> list:
 
     Example: evens_squared([1, 2, 3, 4, 5]) == [4, 16]
     """
-    raise NotImplementedError
+    return [n * n for n in nums if n % 2 == 0]
 
 
 def fibonacci(n: int):
@@ -30,4 +30,7 @@ def fibonacci(n: int):
 
     Must be a generator (use `yield`), not a function returning a list.
     """
-    raise NotImplementedError
+    a, b = 0, 1
+    for _ in range(n):
+        yield a
+        a, b = b, a + b
