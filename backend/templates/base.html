@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Django Playground{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'blog:post_list' %}">Blog</a></h1>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
