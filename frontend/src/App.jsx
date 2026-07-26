@@ -1,8 +1,14 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import PostListPage from './pages/PostListPage'
+
 function App() {
   return (
-    <div>
+    <BrowserRouter>
       <h1>Blog</h1>
-    </div>
+      <Routes>
+        <Route path="/" element={<PostListPage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
