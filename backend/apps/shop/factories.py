@@ -1,6 +1,7 @@
 import factory
 
-from apps.shop.models import Category, Product
+from apps.core.factories import UserFactory
+from apps.shop.models import Cart, Category, Product
 
 
 class CategoryFactory(factory.django.DjangoModelFactory):
@@ -21,3 +22,10 @@ class ProductFactory(factory.django.DjangoModelFactory):
     price = "19.99"
     stock = 10
     category = factory.SubFactory(CategoryFactory)
+
+
+class CartFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Cart
+
+    user = factory.SubFactory(UserFactory)
