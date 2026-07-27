@@ -1,0 +1,757 @@
+<title>Django Playground — Lessons</title>
+<style>
+  :root {
+    --bg: #eef2ef;
+    --surface: #ffffff;
+    --surface-2: #e4e9e5;
+    --border: #d3dbd5;
+    --ink: #16211c;
+    --ink-muted: #52645a;
+    --ink-faint: #7c8c82;
+    --accent: #17724f;
+    --accent-ink: #ffffff;
+    --accent-warm: #c9812e;
+    --accent-warm-ink: #241703;
+    --code-bg: #101a15;
+    --code-ink: #d8e8dd;
+    --shadow: 0 1px 0 rgba(22, 33, 28, 0.04);
+    --radius: 7px;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1613; --surface: #16201b; --surface-2: #1c2721; --border: #283830;
+      --ink: #e7ece8; --ink-muted: #a3b6ac; --ink-faint: #718077;
+      --accent: #46d192; --accent-ink: #06170f; --accent-warm: #e7a552; --accent-warm-ink: #241703;
+      --code-bg: #0a100d; --code-ink: #cfe6da; --shadow: 0 1px 0 rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1613; --surface: #16201b; --surface-2: #1c2721; --border: #283830;
+    --ink: #e7ece8; --ink-muted: #a3b6ac; --ink-faint: #718077;
+    --accent: #46d192; --accent-ink: #06170f; --accent-warm: #e7a552; --accent-warm-ink: #241703;
+    --code-bg: #0a100d; --code-ink: #cfe6da; --shadow: 0 1px 0 rgba(0,0,0,0.3);
+  }
+  :root[data-theme="light"] {
+    --bg: #eef2ef; --surface: #ffffff; --surface-2: #e4e9e5; --border: #d3dbd5;
+    --ink: #16211c; --ink-muted: #52645a; --ink-faint: #7c8c82;
+    --accent: #17724f; --accent-ink: #ffffff; --accent-warm: #c9812e; --accent-warm-ink: #241703;
+    --code-bg: #101a15; --code-ink: #d8e8dd; --shadow: 0 1px 0 rgba(22,33,28,0.04);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.65; }
+  h1, h2, h3 { font-family: var(--serif); text-wrap: balance; margin: 0; }
+  code, pre, .mono { font-family: var(--mono); }
+  a { color: var(--accent); }
+
+  .app { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+
+  .topbar {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.8rem 1.25rem; border-bottom: 1px solid var(--border);
+    background: var(--surface); box-shadow: var(--shadow); flex-wrap: wrap;
+  }
+  .topbar .mark {
+    width: 1.6rem; height: 1.6rem; border-radius: 4px; background: var(--accent); color: var(--accent-ink);
+    display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.85rem; font-weight: 700; flex: none;
+  }
+  .topbar h1 { font-size: 1.25rem; font-weight: 600; }
+  .topbar .sub { color: var(--ink-faint); font-size: 0.82rem; font-family: var(--mono); }
+  .progresswrap { flex: 1; min-width: 10rem; display: flex; align-items: center; gap: 0.6rem; }
+  .progresstrack { flex: 1; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .progressfill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s ease; }
+  .progresslabel { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-muted); white-space: nowrap; }
+  .resetbtn {
+    font-family: var(--sans); font-size: 0.78rem; color: var(--ink-faint); background: none;
+    border: 1px solid var(--border); border-radius: 999px; padding: 0.25rem 0.7rem; cursor: pointer;
+  }
+  .resetbtn:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  .body { display: grid; grid-template-columns: 19rem 1fr; min-height: 0; }
+
+  nav.index { border-right: 1px solid var(--border); background: var(--surface); overflow-y: auto; padding: 0.75rem 0.5rem 2rem; }
+  .navgroup { margin-bottom: 0.9rem; }
+  .navgroup h3 {
+    font-family: var(--sans); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 0.5rem 0.6rem 0.3rem; font-weight: 700;
+  }
+  .navlink {
+    display: flex; align-items: center; gap: 0.55rem; width: 100%; text-align: left; background: none; border: none;
+    border-left: 2px solid transparent; color: var(--ink-muted); padding: 0.38rem 0.6rem; font-size: 0.86rem;
+    font-family: var(--sans); border-radius: 0 4px 4px 0; cursor: pointer;
+  }
+  .navlink:hover { background: var(--surface-2); color: var(--ink); }
+  .navlink[aria-current="true"] { background: var(--surface-2); color: var(--ink); border-left-color: var(--accent); font-weight: 600; }
+  .navlink .num {
+    flex: none; width: 1.3rem; height: 1.3rem; border-radius: 50%; border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.66rem; color: var(--ink-faint);
+  }
+  .navlink.done .num { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .navlink.done .num::before { content: "✓"; }
+  .navlink.done .num.hide-check::before { content: none; }
+
+  main.reader { overflow-y: auto; padding: 2rem 2.5rem 3rem; display: flex; justify-content: center; }
+  .lesson { display: none; max-width: 42rem; width: 100%; }
+  .lesson.active { display: block; }
+
+  .lesson .kicker { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.04em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700; }
+  .lesson h2 { font-size: 1.7rem; font-weight: 600; margin-bottom: 1rem; }
+  .lesson .lede { font-size: 1.06rem; margin-bottom: 1.2rem; }
+  .lesson .lede em { font-style: normal; background: color-mix(in srgb, var(--accent-warm) 25%, transparent); border-radius: 3px; padding: 0 0.15rem; }
+
+  .block { margin-bottom: 1.2rem; }
+  .block h3 { font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 700; margin-bottom: 0.4rem; }
+  .block p { margin: 0 0 0.55rem; }
+  .block ul { margin: 0; padding-left: 1.15rem; }
+  .block li { margin-bottom: 0.4rem; }
+
+  .repo-panel {
+    border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.3rem;
+  }
+  .repo-panel .repo-head {
+    background: var(--surface-2); padding: 0.4rem 0.8rem; font-family: var(--mono); font-size: 0.76rem; color: var(--ink-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  pre.code { background: var(--code-bg); color: var(--code-ink); padding: 0.85rem 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.55; margin: 0; }
+
+  .tryit {
+    background: color-mix(in srgb, var(--accent-warm) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-warm) 45%, var(--border));
+    border-radius: var(--radius); padding: 0.8rem 1rem; margin-bottom: 1.3rem;
+  }
+  .tryit .tag { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-warm-ink); background: var(--accent-warm); display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; margin-bottom: 0.4rem; }
+  .tryit p { margin: 0; }
+
+  .navfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.2rem; border-top: 1px solid var(--border); gap: 1rem; }
+  .navbtn {
+    font-family: var(--sans); font-size: 0.9rem; padding: 0.55rem 1rem; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer;
+    display: flex; align-items: center; gap: 0.4rem; max-width: 45%;
+  }
+  .navbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .navbtn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .navbtn.primary:hover { opacity: 0.92; color: var(--accent-ink); }
+  .navbtn:disabled { opacity: 0.35; cursor: default; }
+  .navbtn .lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; display: block; }
+  .navbtn .ttl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+
+  @media (max-width: 860px) {
+    .body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    nav.index { border-right: none; border-bottom: 1px solid var(--border); max-height: 34vh; }
+    main.reader { padding: 1.5rem 1.25rem 3rem; }
+    .progresswrap { order: 3; width: 100%; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .lesson.active { animation: rise 0.16s ease-out; }
+    @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <span class="mark">01</span>
+    <h1>Lessons</h1>
+    <span class="sub">django-playground — Python &amp; Django, from zero</span>
+    <div class="progresswrap">
+      <div class="progresstrack"><div class="progressfill" id="progressfill"></div></div>
+      <span class="progresslabel" id="progresslabel">0 / 0</span>
+    </div>
+    <button class="resetbtn" id="resetbtn" type="button">Reset progress</button>
+  </header>
+  <div class="body">
+    <nav class="index" id="nav" aria-label="Lesson list"></nav>
+    <main class="reader" id="reader"></main>
+  </div>
+</div>
+
+<script id="content-data" type="application/json">
+{
+  "parts": [
+    {
+      "label": "Part 0 · Orientation",
+      "lessons": [
+        {
+          "id": "what-is-python",
+          "title": "What even is Python?",
+          "lede": "Python is a programming language you write as plain text files ending in <code>.py</code>. Unlike some languages, it doesn't need a separate compile step — you hand a <code>.py</code> file to the <code>python</code> program and it runs line by line, top to bottom.",
+          "blocks": [
+            {"h": "The one syntax rule that surprises newcomers", "p": "Most languages use <code>{ }</code> to mark \"this code is inside that block.\" Python uses indentation instead — the whitespace at the start of a line is not decoration, it's the structure. Two lines indented the same amount are in the same block; less indentation means you've stepped back out of it."},
+            {"h": "Where this repo touches that", "p": "Every file under <code>backend/apps/</code> ending in <code>.py</code> is Python. <code>backend/manage.py</code> is the file you run commands through — e.g. <code>python manage.py runserver</code> starts the dev server."}
+          ],
+          "tryIt": "Open backend/manage.py in an editor. It's short — skim it once just to see plain Python: no magic, a few imports and a function call."
+        },
+        {
+          "id": "what-is-django",
+          "title": "What even is Django?",
+          "lede": "Django is a <strong>web framework</strong> — a large, pre-written body of Python code that handles the boring, repeated parts of running a website, so you only write the parts specific to your app.",
+          "blocks": [
+            {"h": "What \"framework\" means, concretely", "p": "Without Django you'd hand-write: code that listens for web requests, code that talks to a database, code that checks whether a visitor is logged in, code that builds an admin panel. Django already wrote all of that. You describe your data (models), plug in the URLs you want, and write the small bits of logic unique to your app."},
+            {"h": "An analogy", "p": "A framework is a pre-built kitchen — plumbing and stove already installed — versus building a house from raw lumber. You still decide what to cook (your app's actual features); Django supplies the kitchen."}
+          ]
+        },
+        {
+          "id": "request-response",
+          "title": "Request in, response out",
+          "lede": "Every single thing in this repo exists to answer one question: <em>for this web address, which code runs, and what does it send back?</em>",
+          "blocks": [
+            {"h": "The cycle", "list": [
+              "Your browser sends a <strong>request</strong>: a URL plus a method (<code>GET</code> to fetch something, <code>POST</code> to submit something).",
+              "The server (Django) runs some code to figure out what that request means.",
+              "The server sends back a <strong>response</strong> — either a full HTML page, or, for an API, raw data as JSON."
+            ]},
+            {"h": "Why this matters before anything else", "p": "Nearly every concept coming up — URLs, views, serializers — is really just \"which part of the request/response cycle does this piece handle.\""}
+          ]
+        },
+        {
+          "id": "repo-tour",
+          "title": "A tour of this repo's folders",
+          "lede": "Before touching any code, know what's where. The layout isn't arbitrary — it's Django's own convention.",
+          "blocks": [
+            {"h": "Where", "list": [
+              "<code>backend/manage.py</code> — the command-line entry point: run the server, make migrations, open a shell.",
+              "<code>backend/config/</code> — project-wide settings (<code>settings.py</code>) and the top-level URL map (<code>urls.py</code>).",
+              "<code>backend/apps/</code> — one folder per feature area: <code>core</code> (users), <code>blog</code>, <code>shop</code>. Each has its own <code>models.py</code>, <code>views.py</code>, <code>admin.py</code>, and a <code>tests/</code> folder.",
+              "<code>frontend/</code> — a separate React app that talks to Django only over the network, as an API client."
+            ]},
+            {"h": "The pattern to notice", "p": "Everything specific to \"blog stuff\" lives inside <code>apps/blog/</code>. Nothing in <code>apps/shop/</code> needs to know blog exists. That separation is why new features get added as new apps instead of growing one giant file."}
+          ],
+          "tryIt": "Run `find backend/apps -maxdepth 2 -type d` in a terminal and just look at the shape it prints."
+        }
+      ]
+    },
+    {
+      "label": "Part 1 · Python, using this repo's code",
+      "lessons": [
+        {
+          "id": "variables-types",
+          "title": "Variables and types",
+          "lede": "A variable is just a name pointing at a value. Python figures out the type from the value itself — you never declare <code>int x</code> the way some languages require.",
+          "blocks": [
+            {"h": "The types that matter most in this repo", "list": [
+              "<code>str</code> — text, e.g. a product's name.",
+              "<code>int</code> / <code>bool</code> — whole numbers and True/False.",
+              "<code>Decimal</code> — exact decimal numbers, used for every price in this project instead of the more common (but imprecise) floating-point number."
+            ]},
+            {"h": "In this repo", "p": "When a model field is declared <code>price = models.DecimalField(max_digits=10, decimal_places=2)</code>, that's Django's way of saying: \"this column holds a <code>Decimal</code> value, store it exactly, never as a rounded float.\""}
+          ]
+        },
+        {
+          "id": "functions",
+          "title": "Functions",
+          "lede": "A function is a named, reusable block of code: you give it inputs (parameters), it does something, and it can hand back a result with <code>return</code>.",
+          "repo": {
+            "head": "backend/apps/shop/services.py",
+            "code": "def cart_total(cart):\n    return sum(\n        (item.subtotal for item in cart.items.select_related(\"product\")), Decimal(\"0\")\n    )"
+          },
+          "blocks": [
+            {"h": "Reading this one function", "p": "<code>def cart_total(cart):</code> declares a function named <code>cart_total</code> that takes one input, <code>cart</code>. Everything indented underneath is its body. <code>return</code> is what the function hands back to whoever called it — here, the total price of everything in that cart."}
+          ]
+        },
+        {
+          "id": "classes-objects",
+          "title": "Classes and objects",
+          "lede": "A <strong>class</strong> is a blueprint. An <strong>object</strong> (or \"instance\") is one specific thing built from that blueprint.",
+          "repo": {
+            "head": "backend/apps/shop/models.py",
+            "code": "class Product(models.Model):\n    name = models.CharField(max_length=200)\n    price = models.DecimalField(max_digits=10, decimal_places=2)"
+          },
+          "blocks": [
+            {"h": "The blueprint vs. the thing", "p": "<code>class Product</code> is the blueprint — it says every product has a <code>name</code> and a <code>price</code>. Creating <code>Product(name=\"Mug\", price=\"9.99\")</code> somewhere in code builds one actual object following that blueprint — one real row that will be saved to the database."},
+            {"h": "Why Django uses classes for models specifically", "p": "A class is a natural way to describe \"a thing with named properties\" — which is exactly what a database row is. This connection (a Python class ↔ a database table) is the subject of the next few lessons."}
+          ]
+        },
+        {
+          "id": "self",
+          "title": "self — an object talking about itself",
+          "lede": "Inside a class, methods (functions that belong to a class) take <code>self</code> as their first parameter — it refers to the specific object the method was called on.",
+          "repo": {
+            "head": "backend/apps/shop/models.py",
+            "code": "@property\ndef subtotal(self):\n    return self.product.price * self.quantity"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "If <code>item</code> is one specific <code>CartItem</code>, then <code>item.subtotal</code> runs this method with <code>self</code> bound to <code>item</code> — so <code>self.product</code> means \"this particular item's product,\" not some other item's."},
+            {"h": "Why it's explicit in Python", "p": "Some languages let a method silently know which object it belongs to. Python makes it an explicit first parameter — more typing, but nothing hidden about where <code>self.quantity</code> comes from."}
+          ]
+        },
+        {
+          "id": "inheritance",
+          "title": "Inheritance",
+          "lede": "<code>class X(Y):</code> means \"X is a Y, plus whatever extra I add.\" X automatically gets everything Y already has.",
+          "repo": {
+            "head": "backend/apps/core/models.py",
+            "code": "class User(AbstractUser):\n    \"\"\"Custom user model. No extra fields yet.\"\"\""
+          },
+          "blocks": [
+            {"h": "What this buys, for free", "p": "<code>AbstractUser</code> is Django's built-in user class — it already has <code>username</code>, <code>password</code>, <code>email</code>, login-checking logic, all of it. This project's <code>User</code> class inherits every bit of that and currently adds nothing new — it exists purely so a field could be added later (like <code>avatar</code> or <code>bio</code>) without the painful rewrite of switching user models mid-project."}
+          ]
+        },
+        {
+          "id": "imports",
+          "title": "Imports — borrowing code from another file",
+          "lede": "<code>import</code> is how one Python file uses code written in another file.",
+          "repo": {
+            "head": "backend/apps/shop/services.py",
+            "code": "from apps.shop.models import CartItem, Order, OrderItem"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "This line says: \"from the module <code>apps.shop.models</code>, bring in the names <code>CartItem</code>, <code>Order</code>, and <code>OrderItem</code> so this file can use them directly.\" Without it, writing <code>Order.objects.create(...)</code> in <code>services.py</code> would fail — Python wouldn't know what <code>Order</code> refers to."}
+          ]
+        },
+        {
+          "id": "decorators",
+          "title": "Decorators — the @ symbol",
+          "lede": "A line starting with <code>@</code> just above a function or class is a <strong>decorator</strong>: it wraps that function/class to change how it behaves, without changing its own code.",
+          "blocks": [
+            {"h": "Two decorators already seen in this repo", "list": [
+              "<code>@property</code> (on <code>CartItem.subtotal</code>) — makes a method callable like a plain attribute: <code>item.subtotal</code>, no parentheses needed.",
+              "<code>@transaction.atomic</code> (on <code>checkout()</code>) — wraps the whole function in a database transaction, so its writes all succeed together or all get undone together."
+            ]},
+            {"h": "The idea underneath both", "p": "A decorator is just a function that takes your function and returns a replacement. Nothing magic — <code>@transaction.atomic</code> above <code>def checkout(cart):</code> is shorthand for <code>checkout = transaction.atomic(checkout)</code>."}
+          ]
+        },
+        {
+          "id": "exceptions",
+          "title": "try / except / raise",
+          "lede": "When something goes wrong, Python code <code>raise</code>s an exception — a signal that interrupts normal flow — and other code can <code>catch</code> it with <code>try</code>/<code>except</code> to handle it gracefully instead of crashing.",
+          "repo": {
+            "head": "backend/apps/shop/services.py",
+            "code": "class InsufficientStockError(Exception):\n    pass\n\n# ...inside checkout():\nif item.quantity > item.product.stock:\n    raise InsufficientStockError(f\"Not enough stock for {item.product.name}\")"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "<code>InsufficientStockError</code> is a custom exception type — a specific, nameable kind of failure. When checkout notices there isn't enough stock, it deliberately <code>raise</code>s that error rather than letting the order go through wrong. Test code later checks for this exact exception with <code>pytest.raises(InsufficientStockError)</code>."}
+          ]
+        },
+        {
+          "id": "loops-comprehensions",
+          "title": "Loops and comprehensions",
+          "lede": "A <code>for</code> loop repeats code once per item in a collection. Python also has a compact one-line form for building or consuming a sequence, called a comprehension (or, with parentheses, a generator expression).",
+          "blocks": [
+            {"h": "The long form", "p": "<code>for item in cart.items.all(): total += item.subtotal</code> — an explicit loop, one step at a time."},
+            {"h": "The compact form used in this repo", "where": true, "p": "<code>(item.subtotal for item in cart.items.select_related(\"product\"))</code> inside <code>cart_total()</code> does the same looping, but produces the values one at a time as <code>sum()</code> asks for them, instead of building a whole list in memory first. Parentheses (not square brackets) is what makes it a generator expression rather than a list."}
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Part 2 · Django fundamentals",
+      "lessons": [
+        {
+          "id": "models-are-tables",
+          "title": "A model is a database table, written as a class",
+          "lede": "This is the single most important idea in Django: you never write raw SQL to define your database. You write a Python class, and Django turns it into a table.",
+          "repo": {
+            "head": "backend/apps/shop/models.py",
+            "code": "class Category(models.Model):\n    name = models.CharField(max_length=100, unique=True)\n    slug = models.SlugField(unique=True)"
+          },
+          "blocks": [
+            {"h": "The mapping", "list": [
+              "The class <code>Category</code> becomes a database table (something like <code>shop_category</code>).",
+              "Each field (<code>name</code>, <code>slug</code>) becomes a column.",
+              "Each saved object becomes one row."
+            ]},
+            {"h": "Field types are also constraints", "p": "<code>CharField(max_length=100)</code> means \"a short text column, at most 100 characters.\" <code>unique=True</code> tells the database itself to reject a duplicate — not just Python code checking after the fact."}
+          ]
+        },
+        {
+          "id": "migrations",
+          "title": "Migrations — turning models into real database changes",
+          "lede": "Writing a model class doesn't touch the actual database file by itself. Migrations are the bridge between \"here's what my models look like now\" and \"here's what the database file needs changed to match.\"",
+          "blocks": [
+            {"h": "The two-step dance", "list": [
+              "<code>python manage.py makemigrations shop</code> — Django compares your models to the last known state and writes out a migration file describing the difference (\"add table Order with these columns\").",
+              "<code>python manage.py migrate</code> — actually runs that migration against the real database file."
+            ]},
+            {"h": "Where to see it", "p": "<code>backend/apps/shop/migrations/0003_order_orderitem.py</code> is the generated file from adding the Order/OrderItem models — a permanent, checked-in record of exactly how the schema evolved."}
+          ]
+        },
+        {
+          "id": "the-orm",
+          "title": "The ORM — Python instead of SQL",
+          "lede": "ORM stands for Object-Relational Mapper: it lets you query the database by calling Python methods, and it translates those calls into SQL behind the scenes.",
+          "repo": {
+            "head": "backend/apps/blog/views.py",
+            "code": "def get_queryset(self):\n    return Post.objects.filter(published=True)"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "<code>Post.objects</code> is the \"manager\" for the Post table — your entry point for querying it. <code>.filter(published=True)</code> builds (and, once used, runs) something equivalent to <code>SELECT * FROM blog_post WHERE published = true</code>, without a single line of SQL written by hand."},
+            {"h": "Why this is worth learning well", "p": "Almost every bug and performance question later in this project (like the N+1 query problem) is really a question about what SQL a chain of <code>.filter()</code>/<code>.select_related()</code> calls actually produces."}
+          ]
+        },
+        {
+          "id": "admin-site",
+          "title": "The admin site — a free CRUD UI",
+          "lede": "Django ships a full working web interface for creating, viewing, editing, and deleting your data — generated automatically from your models, no template written by hand.",
+          "repo": {
+            "head": "backend/apps/shop/admin.py",
+            "code": "@admin.register(Product)\nclass ProductAdmin(admin.ModelAdmin):\n    list_display = (\"name\", \"category\", \"price\", \"stock\", \"active\")\n    list_filter = (\"category\", \"active\")"
+          },
+          "blocks": [
+            {"h": "What this three-line class buys you", "p": "A whole page at <code>/admin/shop/product/</code> listing every product in a sortable table, filterable by category and active status, with working add/edit/delete forms — built from the <code>Product</code> model's own fields. <code>list_display</code>/<code>list_filter</code> only customize which columns show; the CRUD behavior itself is entirely free."}
+          ],
+          "tryIt": "Run the dev server and visit /admin/ once you've created a superuser (`python manage.py createsuperuser`) — click into Products and just look around."
+        },
+        {
+          "id": "urls",
+          "title": "URLs — routing a web address to code",
+          "lede": "A URLconf is a list of patterns Django checks, top to bottom, to decide which code should handle an incoming request.",
+          "repo": {
+            "head": "backend/apps/blog/urls.py",
+            "code": "urlpatterns = [\n    path(\"\", views.PostListView.as_view(), name=\"post_list\"),\n    path(\"<slug:slug>/\", views.PostDetailView.as_view(), name=\"post_detail\"),\n]"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "A request for <code>/blog/</code> matches the first pattern and runs <code>PostListView</code>. A request for <code>/blog/my-first-post/</code> matches the second — <code>&lt;slug:slug&gt;</code> captures whatever's in that spot in the URL and hands it to the view as <code>slug=\"my-first-post\"</code>."},
+            {"h": "The two-level structure", "p": "<code>backend/config/urls.py</code> is the top-level map (\"anything starting with <code>blog/</code> goes to <code>apps.blog.urls</code>\"); each app then has its own <code>urls.py</code> for just its own patterns. This keeps blog's URLs from needing to know shop exists."}
+          ]
+        },
+        {
+          "id": "views",
+          "title": "Views — the code that actually runs",
+          "lede": "A view is the function or class that a URL points to — it decides what data to fetch and what to send back as the response.",
+          "repo": {
+            "head": "backend/apps/blog/views.py",
+            "code": "class PostDetailView(DetailView):\n    model = Post\n    template_name = \"blog/post_detail.html\"\n    slug_url_kwarg = \"slug\""
+          },
+          "blocks": [
+            {"h": "What happens when this view runs", "p": "Django already knows how to fetch \"the one Post whose slug matches the URL\" because this is a <code>DetailView</code> — a Django-provided class built exactly for \"show one object.\" This view only has to say <em>which</em> model and <em>which</em> template; the fetch-one-object logic is inherited."}
+          ]
+        },
+        {
+          "id": "templates",
+          "title": "Templates — HTML with blanks to fill in",
+          "lede": "A template is an HTML file with placeholders that get filled in with real data when a view renders it.",
+          "blocks": [
+            {"h": "The idea", "p": "Somewhere in <code>blog/post_detail.html</code>, <code>{{ post.title }}</code> is a placeholder. When <code>PostDetailView</code> renders that template, it hands over the actual <code>Post</code> object as <code>post</code>, and Django substitutes <code>{{ post.title }}</code> with that post's real title before sending the HTML to the browser."},
+            {"h": "The split this enforces", "p": "The view decides <em>what</em> data is relevant; the template decides <em>how</em> it looks on the page. Mixing those two concerns into one file is exactly what this separation avoids."}
+          ]
+        },
+        {
+          "id": "cbv-mixins",
+          "title": "Class-based views and mixins",
+          "lede": "Instead of writing every view from scratch, you can build one out of several parent classes — each contributing one specific rule.",
+          "repo": {
+            "head": "backend/apps/blog/views.py",
+            "code": "class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):\n    def test_func(self):\n        return self.get_object().author == self.request.user"
+          },
+          "blocks": [
+            {"h": "Reading the three parents", "list": [
+              "<code>LoginRequiredMixin</code> — redirects anonymous visitors to the login page before anything else runs.",
+              "<code>UserPassesTestMixin</code> — blocks the request unless <code>test_func()</code> returns True; here, unless you're the post's author.",
+              "<code>UpdateView</code> — supplies the actual \"show a form, save the changes\" behavior."
+            ]},
+            {"h": "Why this is worth noticing", "p": "None of that logic was written by hand in this class — each rule was inherited from a parent, and this class only fills in the one detail (<code>test_func</code>) that's actually unique to it."}
+          ]
+        },
+        {
+          "id": "forms",
+          "title": "Forms — validating what a user submits",
+          "lede": "A form is Django's tool for taking raw submitted data, checking it's valid, and turning it into clean Python values (or a saved object).",
+          "blocks": [
+            {"h": "Where it shows up", "p": "<code>PostCreateView</code> uses <code>fields = [\"title\", \"slug\", \"body\", \"published\", \"tags\"]</code> — Django builds the form automatically from those model fields, including the right input type for each (a checkbox for the boolean <code>published</code>, a text box for <code>title</code>) and validates them (e.g. a slug must be URL-safe) before anything touches the database."}
+          ]
+        },
+        {
+          "id": "auth-sessions",
+          "title": "Users, login, and sessions",
+          "lede": "A session is how Django remembers \"this browser is logged in as this user\" across multiple separate requests, using a cookie.",
+          "blocks": [
+            {"h": "The flow", "list": [
+              "You submit a login form; Django checks the password.",
+              "On success, Django creates a session and sends the browser a cookie identifying it.",
+              "Every later request from that browser includes the cookie, so Django knows <code>request.user</code> without asking you to log in again."
+            ]},
+            {"h": "Where it's used", "p": "<code>LoginRequiredMixin</code> from the previous lesson is checking exactly this — is there a valid session cookie identifying a logged-in user."}
+          ],
+          "related": "auth-flow-preview"
+        }
+      ]
+    },
+    {
+      "label": "Part 3 · Building an API for a frontend",
+      "lessons": [
+        {
+          "id": "what-is-rest",
+          "title": "What's an API, what's REST",
+          "lede": "So far, views return whole HTML pages. An API instead returns raw data — usually as JSON — so any frontend (a React app, a mobile app) can read it and render its own UI.",
+          "blocks": [
+            {"h": "REST, briefly", "p": "REST is just a common convention for shaping that data-only API around resources and HTTP methods: <code>GET /api/posts/</code> lists posts, <code>POST /api/posts/</code> creates one, <code>GET /api/posts/3/</code> fetches post 3, <code>PUT</code>/<code>PATCH</code> edit it, <code>DELETE</code> removes it — the URL names the thing, the HTTP method names the action."},
+            {"h": "In this repo", "p": "Django REST Framework (DRF) is the library that adds this API layer on top of Django, living alongside the older template-based blog views from Part 2 — both serve the same underlying <code>Post</code> model."}
+          ]
+        },
+        {
+          "id": "serializers",
+          "title": "Serializers — translating models to and from JSON",
+          "lede": "A serializer is DRF's version of a form: it converts a Django model object into JSON to send out, and validates incoming JSON before turning it back into a model object.",
+          "repo": {
+            "head": "backend/apps/blog/serializers.py",
+            "code": "class PostSerializer(serializers.ModelSerializer):\n    author = serializers.ReadOnlyField(source=\"author.username\")\n\n    class Meta:\n        model = Post\n        fields = [\"id\", \"title\", \"slug\", \"body\", \"author\", \"published\", \"tags\"]"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "<code>ModelSerializer</code> looks at the <code>Post</code> model and figures out most of the field types itself. <code>author</code> is overridden to show the username as plain read-only text instead of a raw database ID — a small, explicit customization on top of what's inferred automatically."}
+          ]
+        },
+        {
+          "id": "viewsets-routers",
+          "title": "ViewSets and routers",
+          "lede": "A ViewSet bundles up the list/create/retrieve/update/delete logic for one model into a single class; a router then generates all the matching URLs automatically.",
+          "repo": {
+            "head": "backend/apps/blog/api_urls.py",
+            "code": "router = DefaultRouter()\nrouter.register(\"posts\", PostViewSet, basename=\"post\")\nurlpatterns = router.urls"
+          },
+          "blocks": [
+            {"h": "What those two lines generate", "p": "<code>GET/POST /api/posts/</code> and <code>GET/PUT/PATCH/DELETE /api/posts/&lt;id&gt;/</code> — the full set of REST URLs for posts, without writing a single <code>path(...)</code> line by hand the way Part 2's <code>urls.py</code> required."}
+          ]
+        },
+        {
+          "id": "permissions",
+          "title": "Permissions — who can do what",
+          "lede": "A permission class answers a yes/no question before a view runs: is this specific request allowed?",
+          "repo": {
+            "head": "backend/apps/blog/api.py",
+            "code": "class PostViewSet(viewsets.ModelViewSet):\n    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]"
+          },
+          "blocks": [
+            {"h": "Two checks stacked together", "p": "<code>IsAuthenticatedOrReadOnly</code> answers \"can you write anything here at all\" (anonymous users get read-only access). <code>IsAuthorOrReadOnly</code> is a small custom class answering a narrower question: \"is this post yours to edit,\" by comparing <code>obj.author</code> to <code>request.user</code>. Both must pass."}
+          ]
+        },
+        {
+          "id": "jwt",
+          "title": "Tokens (JWT) — auth without cookies",
+          "lede": "A separately-hosted frontend (this project's React app runs on its own dev server) can't rely on Django's session cookie the same way a template-rendered page can. JWT is a different way to prove who's logged in.",
+          "blocks": [
+            {"h": "How it works here", "list": [
+              "React sends username/password to <code>/api/token/</code>.",
+              "Django sends back an access token — a signed, tamper-proof string that encodes \"this is user X, valid until this time.\"",
+              "React stores it and attaches it to every later API request as an <code>Authorization: Bearer &lt;token&gt;</code> header instead of relying on a cookie."
+            ]},
+            {"h": "Why both auth systems exist side by side", "p": "Session auth still runs the Django admin and the signup page from Part 2; JWT is only for the React app. DRF is configured to accept either one — see <code>DEFAULT_AUTHENTICATION_CLASSES</code> in <code>config/settings.py</code>."}
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Part 4 · The shop app: relationships & integrity",
+      "lessons": [
+        {
+          "id": "relationships",
+          "title": "Modeling relationships: ForeignKey, ManyToMany, OneToOne",
+          "lede": "Real data isn't flat — a Product belongs to a Category, an Order has many OrderItems, a Cart belongs to exactly one user. Django has one field type for each shape of relationship.",
+          "blocks": [
+            {"h": "The three shapes, with real examples", "list": [
+              "<strong>ForeignKey</strong> (many-to-one) — <code>Product.category = models.ForeignKey(Category, ...)</code>: many products, one category each.",
+              "<strong>ManyToManyField</strong> — <code>Post.tags = models.ManyToManyField(Tag, ...)</code>: a post can have many tags, and a tag can label many posts.",
+              "<strong>OneToOneField</strong> — <code>Cart.user = models.OneToOneField(settings.AUTH_USER_MODEL, ...)</code>: exactly one cart per user, no more."
+            ]},
+            {"h": "Why the field type matters, not just the name", "p": "Each of these creates a different actual structure in the database (a foreign-key column, versus a whole separate join table for many-to-many). Picking the right one is picking the right shape for the real-world relationship, not just a naming choice."}
+          ]
+        },
+        {
+          "id": "service-layer-lesson",
+          "title": "Why checkout logic lives in its own file",
+          "lede": "<code>apps/shop/services.py</code> holds plain functions like <code>add_to_cart</code> and <code>checkout</code> — not methods on the <code>Cart</code> model, and not code inside a view.",
+          "blocks": [
+            {"h": "The reasoning", "p": "A rule like \"checkout must fail entirely if any item is out of stock\" isn't really about the database (the model's job) or about HTTP (the view's job) — it's business logic, a third thing. Writing it as a plain function makes it trivially testable on its own, and reusable later from a Celery background task without duplicating it."}
+          ]
+        },
+        {
+          "id": "transactions",
+          "title": "Database transactions — all or nothing",
+          "lede": "A transaction groups several database writes so they either <em>all</em> succeed together, or, if anything fails partway, they all get undone as if none had happened.",
+          "repo": {
+            "head": "backend/apps/shop/services.py",
+            "code": "@transaction.atomic\ndef checkout(cart):\n    ...\n    order = Order.objects.create(user=cart.user, total=Decimal(\"0\"))\n    for item in items:\n        OrderItem.objects.create(order=order, ...)\n        item.product.stock -= item.quantity\n        item.product.save()\n    ..."
+          },
+          "blocks": [
+            {"h": "Why this matters here specifically", "p": "Checkout makes several separate writes: create the order, create each order item, decrement stock for each product, clear the cart. Without <code>@transaction.atomic</code>, a crash halfway through could leave an order with only half its items, or stock decremented but no order recorded at all. The decorator guarantees it's all-or-nothing."}
+          ]
+        },
+        {
+          "id": "signals",
+          "title": "Signals — code that reacts automatically",
+          "lede": "A signal lets one piece of code announce \"something just happened,\" and other, completely separate code react to it — without the first piece knowing the second exists.",
+          "repo": {
+            "head": "backend/apps/shop/signals.py",
+            "code": "@receiver(post_save, sender=Order)\ndef send_order_confirmation(sender, instance, created, **kwargs):\n    if created:\n        logger.info(\"Order confirmation email queued for order #%s\", instance.pk)"
+          },
+          "blocks": [
+            {"h": "Reading it", "p": "<code>post_save</code> fires every time <em>any</em> Order is saved. This function only reacts <code>if created</code> — the first time, not on every later update. <code>checkout()</code> never imports or calls this function directly; Django wires it up automatically because it's registered with <code>@receiver</code>."},
+            {"h": "Why it's just a log line for now", "p": "It's a deliberate placeholder — the exact seam a later lesson (Celery, for real background email sending) will plug into, without needing to touch <code>checkout()</code> at all."}
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Part 5 · What's coming next",
+      "lessons": [
+        {
+          "id": "whats-next",
+          "title": "A preview of what's still ahead",
+          "lede": "These aren't built yet — they're the concepts the next stages of this project will introduce, so the names won't be a surprise when they show up.",
+          "blocks": [
+            {"h": "Celery — background tasks", "p": "Right now the order-confirmation signal only logs a line. Celery lets that turn into a real task (like sending an email) that runs in the background, without making the person checking out wait for it."},
+            {"h": "Caching", "p": "Storing the result of an expensive query so the next request can skip re-running it — with the tricky part being knowing exactly when to throw that stored result away."},
+            {"h": "Rate limiting", "p": "Capping how many requests one person can make in a given time window — protecting a login page from being guessed at, or a checkout endpoint from being hammered."}
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById("content-data").textContent);
+  const nav = document.getElementById("nav");
+  const reader = document.getElementById("reader");
+  const STORAGE_KEY = "djangoPlaygroundLessons";
+
+  function esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+  const flat = [];
+  data.parts.forEach(part => part.lessons.forEach(l => flat.push(Object.assign({ part: part.label }, l))));
+
+  function loadProgress() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { done: [], last: null }; }
+    catch (e) { return { done: [], last: null }; }
+  }
+  function saveProgress(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+  let progress = loadProgress();
+
+  function renderBlock(b) {
+    let html = "<div class=\"block\">";
+    if (b.h) html += "<h3>" + esc(b.h) + "</h3>";
+    if (b.p) html += "<p>" + b.p + "</p>";
+    if (b.list) html += "<ul>" + b.list.map(li => "<li>" + li + "</li>").join("") + "</ul>";
+    html += "</div>";
+    return html;
+  }
+
+  function renderLesson(l, idx) {
+    let html = "";
+    html += "<div class=\"kicker\">" + esc(l.part) + " · Lesson " + (idx + 1) + " of " + flat.length + "</div>";
+    html += "<h2>" + esc(l.title) + "</h2>";
+    html += "<p class=\"lede\">" + l.lede + "</p>";
+    if (l.repo) {
+      html += "<div class=\"repo-panel\"><div class=\"repo-head\">" + esc(l.repo.head) + "</div><pre class=\"code\">" + esc(l.repo.code) + "</pre></div>";
+    }
+    (l.blocks || []).forEach(b => { html += renderBlock(b); });
+    if (l.tryIt) {
+      html += "<div class=\"tryit\"><span class=\"tag\">Try it</span><p>" + esc(l.tryIt) + "</p></div>";
+    }
+    html += "<div class=\"navfoot\">";
+    if (idx > 0) {
+      html += "<button class=\"navbtn\" data-nav=\"prev\"><span><span class=\"lbl\">Previous</span><span class=\"ttl\">" + esc(flat[idx - 1].title) + "</span></span></button>";
+    } else {
+      html += "<span></span>";
+    }
+    if (idx < flat.length - 1) {
+      html += "<button class=\"navbtn primary\" data-nav=\"next\"><span><span class=\"lbl\">Next</span><span class=\"ttl\">" + esc(flat[idx + 1].title) + "</span></span></button>";
+    } else {
+      html += "<button class=\"navbtn primary\" disabled><span><span class=\"lbl\">You're at</span><span class=\"ttl\">the last lesson</span></span></button>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  data.parts.forEach(part => {
+    const group = document.createElement("div");
+    group.className = "navgroup";
+    const h3 = document.createElement("h3");
+    h3.textContent = part.label;
+    group.appendChild(h3);
+    part.lessons.forEach(l => {
+      const idx = flat.findIndex(f => f.id === l.id);
+      const btn = document.createElement("button");
+      btn.className = "navlink";
+      btn.dataset.target = l.id;
+      btn.innerHTML = "<span class=\"num\">" + (idx + 1) + "</span><span>" + esc(l.title) + "</span>";
+      group.appendChild(btn);
+    });
+    nav.appendChild(group);
+  });
+
+  flat.forEach((l, idx) => {
+    const section = document.createElement("section");
+    section.className = "lesson";
+    section.id = "lesson-" + l.id;
+    section.innerHTML = renderLesson(l, idx);
+    reader.appendChild(section);
+  });
+
+  function updateProgressBar() {
+    const total = flat.length;
+    const done = progress.done.length;
+    document.getElementById("progressfill").style.width = (total ? (done / total * 100) : 0) + "%";
+    document.getElementById("progresslabel").textContent = done + " / " + total + " done";
+  }
+
+  function refreshNavState(currentId) {
+    document.querySelectorAll(".navlink").forEach(btn => {
+      const isDone = progress.done.includes(btn.dataset.target);
+      btn.classList.toggle("done", isDone);
+      btn.toggleAttribute("aria-current", btn.dataset.target === currentId);
+      if (btn.dataset.target === currentId) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+      const numSpan = btn.querySelector(".num");
+      numSpan.textContent = isDone ? "" : String(flat.findIndex(f => f.id === btn.dataset.target) + 1);
+    });
+  }
+
+  function activate(id) {
+    const idx = flat.findIndex(f => f.id === id);
+    if (idx === -1) return;
+    document.querySelectorAll(".lesson").forEach(s => s.classList.remove("active"));
+    document.getElementById("lesson-" + id).classList.add("active");
+    reader.scrollTop = 0;
+    progress.last = id;
+    saveProgress(progress);
+    refreshNavState(id);
+    history.replaceState(null, "", "#" + id);
+  }
+
+  function markDone(id) {
+    if (!progress.done.includes(id)) {
+      progress.done.push(id);
+      saveProgress(progress);
+      updateProgressBar();
+    }
+  }
+
+  nav.addEventListener("click", e => {
+    const btn = e.target.closest(".navlink");
+    if (btn) activate(btn.dataset.target);
+  });
+
+  reader.addEventListener("click", e => {
+    const navBtn = e.target.closest("[data-nav]");
+    if (!navBtn) return;
+    const current = document.querySelector(".lesson.active").id.replace("lesson-", "");
+    const idx = flat.findIndex(f => f.id === current);
+    if (navBtn.dataset.nav === "next" && idx < flat.length - 1) {
+      markDone(current);
+      activate(flat[idx + 1].id);
+    } else if (navBtn.dataset.nav === "prev" && idx > 0) {
+      activate(flat[idx - 1].id);
+    }
+  });
+
+  document.getElementById("resetbtn").addEventListener("click", () => {
+    progress = { done: [], last: flat[0].id };
+    saveProgress(progress);
+    updateProgressBar();
+    activate(flat[0].id);
+  });
+
+  const initial = location.hash.replace("#", "");
+  const startId = flat.find(f => f.id === initial) ? initial : (progress.last && flat.find(f => f.id === progress.last) ? progress.last : flat[0].id);
+  updateProgressBar();
+  activate(startId);
+})();
+</script>
